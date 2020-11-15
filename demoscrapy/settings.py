@@ -63,7 +63,10 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'demoscrapy.pipelines.VietStockExport': 300,
+   'demoscrapy.pipelines.VietStockExport': 301,
+   # 'demoscrapy.pipelines.ExportToSQLite': 300,
+   # 'demoscrapy.pipelines.ScrawlliststockPipeline': 300,
+   'demoscrapy.pipelines.reportFinancialVietStock': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

@@ -1,20 +1,23 @@
-import  scrapy
+import scrapy
 # from scrapy.spiders import Spider
 from demoscrapy.items import DemoscrapyItem
 from scrapy.loader import ItemLoader
 from scrapy.http import JsonRequest
 from scrapy.http.request.form import FormRequest
+import json
+
 
 class RedditSpider(scrapy.Spider):
     name = "reddit"
     # start_urls = ["https://www.reddit.com/r/cats"]
     start_urls = "https://finance.vietstock.vn/data/gettradingresult"
+
     def start_requests(self):
         # start_urls = ['https://finance.vietstock.vn']
-    # Set the headers here. The important part is "application/json"
-    # TODO setup for tickers
+        # Set the headers here. The important part is "application/json"
+        # TODO setup for tickers
         # for ticker in tickers:
-        headers =  {
+        headers = {
             "Connection": "keep-alive",
             "Accept": "*/*",
             "X-Requested-With": "XMLHttpRequest",
@@ -38,7 +41,7 @@ class RedditSpider(scrapy.Spider):
             "ExportType": "default",
             "Cols": "TKLGD,TGTGD,VHTT,GD3,TGG,TGPTG,BQM,BQB,KLGDKL,GTGDKL",
             "ExchangeID": "1"
-            }
+        }
         cookies = {
             '_ga': 'ga1.3.1850311231.1604374787',
             '_gid': 'ga1.3.126066724.1604835253',
@@ -52,19 +55,20 @@ class RedditSpider(scrapy.Spider):
             '__oaue': 'false',
             'asp.net_sessionid': 'upunkqc05wtmn1nzzcx40xga',
             'adasiauserip': '115.77.123.31',
-        }  
-        
-        yield FormRequest(url = self.start_urls , formdata = data ,headers = headers, cookies = cookies, callback = self.parse)
+        }
+
+        yield FormRequest(url=self.start_urls, formdata=data, headers=headers, cookies=cookies, callback=self.parse)
 
     def parse(self, response):
 
         # TODO parsejson item line
-        # for item in jsonitem['data']:
-        il = ItemLoader(item=DemoscrapyItem())
-        il.add_value("TradingDate", response.text)
-        il.add_value("TotalVolume", response.text)
-        yield il.load_item()
+        jsonitem = json.loads(response.text)
+        # print(jsonitem['Data'])
+        for item in jsonitem['Data']:
+            il = ItemLoader(item=DemoscrapyItem())
+            il.add_value("TradingDate", item['TradingDate'])
+            il.add_value("Time", item['Time'])
+            yield il.load_item()
 
-        
-        
+
 # scrapy crawl +name -o filename.json
