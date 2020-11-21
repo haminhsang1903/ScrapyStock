@@ -25,7 +25,7 @@ class VietStockExport(object):
         return pipeline
 
     def spider_opened(self, spider):
-        self.file = open('vietstockexport_bctc.csv', 'w+b')
+        self.file = open('vietstockexport_bctc_demo.csv', 'w+b')
         self.exporter = CsvItemExporter(self.file)
         self.exporter.start_exporting()
 

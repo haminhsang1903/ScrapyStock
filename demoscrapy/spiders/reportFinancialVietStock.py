@@ -27,39 +27,43 @@ class ReportfinancialvietstockSpider(scrapy.Spider):
         connection = sqlite3.connect("C:\\Users\\adven\\Desktop\\Angular\\Python\\ScrapyStock\\demoscrapy\\VietStockDB.db")
         cursor = connection.cursor()
         
-        rows = cursor.execute("SELECT StockCode, DateNY FROM listStock").fetchall()
+        rows = cursor.execute("SELECT StockCode FROM listStock").fetchall()
 
-        for StockCode, DateNY in rows:           
-            ts = DateNY
-            date_now =  datetime.today().strftime('%d-%m-%Y')
-            start_date = datetime.fromtimestamp(ts).strftime('%d-%m-%Y')      
-            difference_in_years = int(date_now[6:])-int(start_date[6:]) 
+        for StockCode in rows:           
+            # ts = DateNY
+            # date_now =  datetime.today().strftime('%d-%m-%Y')
+            # start_date = datetime.fromtimestamp(ts).strftime('%d-%m-%Y')      
+            # difference_in_years = int(date_now[6:])-int(start_date[6:]) 
 
-            ticker = StockCode
-            page = difference_in_years
-            headers = {
-                    "Connection": "keep-alive",
-                    "Accept": "*/*",
-                    "X-Requested-With": "XMLHttpRequest",
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36 Edg/86.0.622.68",
-                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                    "Origin": "https://finance.vietstock.vn",
-                    "Sec-Fetch-Site": "same-origin",
-                    "Sec-Fetch-Mode": "cors",
-                    "Sec-Fetch-Dest": "empty",
-                    "Referer": "https://finance.vietstock.vn/{}/tai-chinh.htm".format(ticker),
-                    "Accept-Language": "en-US,en;q=0.9"
-            }
-            queries = {
-                    "Code": str(ticker),
-                    "ReportType": "BCTT",
-                    "ReportTermType": "2",
-                    "Unit": "1000000",
-                    "Page": str(page),
-                    "PageSize": "4"
-            }
+            ticker = str(StockCode).replace(',', '').replace('(', '').replace(')', '').replace("""'""", '')
+            print(ticker)
+            data = pd.read_csv('C:\\Users\\adven\\Desktop\\Angular\\Python\\GetTickerPageSize.csv')
+            page = int(data[data['Ticker'] == str(ticker)]['SizePage'])
+            print(page)
+            for i in range(1,page):
+                headers = {
+                        "Connection": "keep-alive",
+                        "Accept": "*/*",
+                        "X-Requested-With": "XMLHttpRequest",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36 Edg/86.0.622.68",
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                        "Origin": "https://finance.vietstock.vn",
+                        "Sec-Fetch-Site": "same-origin",
+                        "Sec-Fetch-Mode": "cors",
+                        "Sec-Fetch-Dest": "empty",
+                        "Referer": "https://finance.vietstock.vn/{}/tai-chinh.htm".format(ticker),
+                        "Accept-Language": "en-US,en;q=0.9"
+                }
+                queries = {
+                        "Code": str(ticker),
+                        "ReportType": "BCTT",
+                        "ReportTermType": "2",
+                        "Unit": "1000000",
+                        "Page": str(i),
+                        "PageSize": "4"
+                }
                 
-            yield FormRequest(url=self.start_urls, formdata=queries, headers=headers,  callback=self.parse, meta={'ticker': ticker})
+                yield FormRequest(url=self.start_urls, formdata=queries, headers=headers,  callback=self.parse, meta={'ticker': ticker})
             
 
     def parse(self, response):
@@ -70,8 +74,8 @@ class ReportfinancialvietstockSpider(scrapy.Spider):
             # TermCode = jsonitem[0]          
             # Get TermCode in Array[0]    
             try:      
-                TermCode = jsonitem[0][i-1]['TermCode']
-                YearPeriod = jsonitem[0][i-1]['YearPeriod']
+                TermCode = jsonitem[0][4-i]['TermCode']
+                YearPeriod = jsonitem[0][4-i]['YearPeriod']
             except Exception as e:
                 print(response.meta['ticker'])
                 continue

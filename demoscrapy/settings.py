@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = False
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'demoscrapy.pipelines.VietStockExport': 301,
+   'demoscrapy.pipelines.VietStockExport': 299,
    # 'demoscrapy.pipelines.ExportToSQLite': 300,
    # 'demoscrapy.pipelines.ScrawlliststockPipeline': 300,
    'demoscrapy.pipelines.reportFinancialVietStock': 300,
